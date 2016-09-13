@@ -2,7 +2,6 @@ package report;
 
 import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 /**
  * Created by noko on 2016/09/08.
@@ -13,10 +12,12 @@ public class DurandKerner
     {
         double[] as = {1,0,-3,0};
         Function<Complex, Complex> p = polynomial(as);
+        Function<Complex, Complex> dp = polynomialDifferential(as);
         Complex[][] table = dkaTable(
             1000,
             initializePoints(as, p),
             p,
+            dp
         );
 
         for (int i = 0; i < table.length; i++)
@@ -37,7 +38,7 @@ public class DurandKerner
             int n = cs.length - i; // != 0
             cs[i] = as[i] * n;
         }
-        Function<Double, Double> df = (x) -> horner(cs, x);
+        Function<Complex, Complex> df = polynomial(cs);
         return df;
     }
 
@@ -110,7 +111,7 @@ public class DurandKerner
                     sum = sum.add(new Complex(1.0).div(z.sub(table[k-1][j])));
                 }
                 // z_i^(k)
-                table[k][i] = z.sub(p.apply(z).div(dp.apply(z).sub(p.apply(z)).mul(sum)));
+                table[k][i] = z.sub(p.apply(z).div(dp.apply(z).sub(p.apply(z).mul(sum))));
             }
         }
         return table;

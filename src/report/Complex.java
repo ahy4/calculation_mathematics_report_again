@@ -9,6 +9,10 @@ public class Complex {
         this.im = im;
     }
 
+    public Complex(double re) {
+        this(re,0);
+    }
+
     public double re() { return re; }
     public double im() { return im; }
 

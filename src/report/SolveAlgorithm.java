@@ -6,7 +6,7 @@ import java.util.function.Function;
 /**
  * Created by noko on 2016/09/08.
  */
-public class DurandKerner
+public class SolveAlgorithm
 {
     public static void testClient()
     {

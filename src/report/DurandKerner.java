@@ -10,10 +10,10 @@ public class DurandKerner
 {
     public static void testClient()
     {
-        double[] as = {1,0,-3,0};
+        double[] as = {1,1,3,-5};
         Function<Complex, Complex> p = polynomial(as);
         Function<Complex, Complex> dp = polynomialDifferential(as);
-        Complex[][] table = dkaTable(
+        Complex[][] table = eaTable(
             1000,
             initializePoints(as, p),
             p,
@@ -90,11 +90,48 @@ public class DurandKerner
                 // z_i^(k)
                 table[k][i] = z.sub(p.apply(z).div(_multiplied));
             }
+            if (isConverged(table[k], table[k-1], p))
+            {
+                return Arrays.copyOf(table, k-1);
+            }
+            if (k>=2 && isLoop(table[k], table[k-2]) && k < count-1) // ループが発生した時に値を変えて脱出させる
+            {
+                k++;
+                table[k] = new Complex[zs.length];
+                for (int i = 0; i < zs.length; i++)
+                {
+                    table[k][i] = table[k-1][i].add(table[k-3][i]).div(new Complex(2));
+                }
+            }
         }
         return table;
     }
 
-    public static Complex[][] dkaTable(int count, Complex[] zs, Function<Complex, Complex> p, Function<Complex, Complex> dp)
+    private static boolean isLoop(Complex[] xs, Complex[] zs)
+    {
+        for (int i = 0; i < xs.length; i++)
+        {
+            if (xs[i].sub(zs[i]).abs()<1.0e-10)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isConverged(Complex[] xs, Complex[] ys, Function<Complex,Complex>p)
+    {
+        double sum = 0;
+        for (int i = 0; i < xs.length; i++)
+        {
+            sum += Math.pow(p.apply(xs[i]).abs(), 2);
+        }
+        sum = Math.sqrt(sum);
+        System.out.println(sum);
+        return sum < 1.0e-9;
+    }
+
+    public static Complex[][] eaTable(int count, Complex[] zs, Function<Complex, Complex> p, Function<Complex, Complex> dp)
     {
         Complex[][] table = new Complex[count][];
         table[0] = zs.clone();
@@ -113,6 +150,10 @@ public class DurandKerner
                 // z_i^(k)
                 table[k][i] = z.sub(p.apply(z).div(dp.apply(z).sub(p.apply(z).mul(sum))));
             }
+            if (isConverged(table[k], table[k+1], p))
+            {
+                return Arrays.copyOf(table, k-1);
+            }
         }
         return table;
     }
@@ -123,7 +164,7 @@ public class DurandKerner
         int n = as.length-1;
         Complex[] result = new Complex[n];
         double pi = Math.PI;
-        double r = 10000;
+        double r = getInitializeRadius(as);
         for (int j = 0; j < n; j++)
         {
             double deg = 2 * pi * (j - 3.0/4) / n;
@@ -150,6 +191,18 @@ public class DurandKerner
         }
         Function<Double, Double> df = (x) -> horner(cs, x);
 
-        return NewtonMethod.exec(f, df);
+        double initialPoint = 0.3;
+        int count = 0;
+        while (count < 10)
+        {
+            double solution = NewtonMethod.exec(f, df, initialPoint);
+            if (solution > 0)
+            {
+                return solution;
+            }
+            count++;
+            initialPoint *= -1.1;
+        }
+        return 10;
     }
 }

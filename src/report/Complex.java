@@ -50,9 +50,9 @@ public class Complex {
 
     public String toString() {
         if(im >= 0)
-            return "(" + re + " + " + im + "i" + ")";
+            return re + " + " + im + "i";
         else
-            return "(" + re + " - " + -im + "i" + ")";
+            return re + " - " + -im + "i";
     }
 
 }

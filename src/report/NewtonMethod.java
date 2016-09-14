@@ -7,12 +7,7 @@ import java.util.function.Function;
  */
 public class NewtonMethod
 {
-    public static double exec(Function<Double, Double> f, Function<Double, Double> df)
-    {
-        return legacyNewtonMethod(f, df, 0.3);
-    }
-
-    private static double legacyNewtonMethod(Function<Double, Double> f, Function<Double, Double> df, double initialPoint)
+    public static double exec(Function<Double, Double> f, Function<Double, Double> df, double initialPoint)
     {
         double eps = 1.0e-12;
         double x0 = initialPoint;
@@ -23,7 +18,7 @@ public class NewtonMethod
         }
         if (i == 301 || Double.isNaN(x0))
         {
-            return legacyNewtonMethod(f, df, -initialPoint*1.1);
+            return exec(f, df, -initialPoint*1.1);
         }
         return x0;
     }
